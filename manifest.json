@@ -1,0 +1,49 @@
+{
+   "action": {
+      "default_icon": "pokeball64.png"
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [
+      {
+         "css": [
+            "onload.css"
+         ],
+         "js": [
+            "js/jquery-3.1.1.min.js",
+            "js/sha256.min.js",
+            "onload.js"
+         ],
+         "matches": [
+            "*://*/*"
+         ]
+      }
+   ],
+   "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+   },
+   "description": "Instant Data Scraper extracts data from Facebook ads library",
+   "externally_connectable": {
+      "ids": [
+         "pcjcfelpdpngehinnoghedlgankmbdpb",
+         "*"
+      ]
+   },
+   "icons": {
+      "128": "pokeball128.png",
+      "16": "pokeball16.png",
+      "32": "pokeball32.png",
+      "64": "pokeball64.png"
+   },
+   "incognito": "split",
+   "manifest_version": 3,
+   "name": "Test Instant Data Scraper",
+   "permissions": [
+      "webRequest",
+      "activeTab",
+      "tabs"
+   ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.0.0"
+}
