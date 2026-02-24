@@ -2,6 +2,8 @@
 
 chrome.action.onClicked.addListener(function (e) { chrome.windows.getCurrent(function (e) { parentWindowId = e.id }), chrome.windows.create({ url: chrome.runtime.getURL("popup.html?tabid=" + encodeURIComponent(e.id) + "&url=" + encodeURIComponent(e.url)), type: "popup", width: 720, height: 650 }) });
 
+chrome.action.onClicked.addListener(function (e) { chrome.windows.getCurrent(function (e) { parentWindowId = e.id }), chrome.windows.create({ url: chrome.runtime.getURL("popup.html?tabid=" + encodeURIComponent(e.id) + "&url=" + encodeURIComponent(e.url)), type: "popup", width: 720, height: 650 }) });
+
 chrome.runtime.onMessageExternal.addListener(
     function (request, sender, sendResponse) {
         console.log("Mensaje recibido de Load FB Ads Library. Ejecutando scraper...");
@@ -23,3 +25,26 @@ chrome.runtime.onMessageExternal.addListener(
         sendResponse({ status: "received" });
     }
 );
+
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.action === "monitorAndReopen") {
+        const targetTabId = request.tabId;
+
+        chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
+            if (tabId === targetTabId && changeInfo.status === "complete") {
+                chrome.tabs.onUpdated.removeListener(listener);
+
+                setTimeout(() => {
+                    chrome.windows.getCurrent(function (e) { parentWindowId = e.id });
+                    chrome.windows.create({
+                        url: chrome.runtime.getURL("popup.html?tabid=" + encodeURIComponent(tabId) + "&url=" + encodeURIComponent(tab.url)),
+                        type: "popup",
+                        width: 720,
+                        height: 650
+                    });
+                }, 3000);
+            }
+        });
+        sendResponse({ status: "monitoring" });
+    }
+});
