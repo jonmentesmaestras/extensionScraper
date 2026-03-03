@@ -52,4 +52,31 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         sendResponse({ status: "monitoring" });
         return true;
     }
+
+    if (request.action === "setRateLimitAlarm") {
+        console.log(`Setting rate limit alarm for ${request.minutes} minutes.`);
+        const targetTabId = request.tabId; // Optional but good for context if passed
+        chrome.alarms.create("resumeScraping", { delayInMinutes: request.minutes });
+        sendResponse({ status: "alarm_set" });
+        return true;
+    }
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "resumeScraping") {
+        console.log("Rate limit pause ended. Reopening scraper...");
+        // Reopen popup by querying active tab, similar to your external message trigger
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            let tab = tabs[0];
+            if (tab) {
+                chrome.windows.getCurrent(function (e) { parentWindowId = e.id });
+                chrome.windows.create({
+                    url: chrome.runtime.getURL("popup.html?tabid=" + encodeURIComponent(tab.id) + "&url=" + encodeURIComponent(tab.url)),
+                    type: "popup",
+                    width: 720,
+                    height: 650
+                });
+            }
+        });
+    }
 });
